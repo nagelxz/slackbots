@@ -1,0 +1,10 @@
+from fogbugz import FogBugz
+from datetime import datetime, timedelta
+from fogbugzapi import creds
+import creds
+fb = FogBugz(creds.URL, creds.TOKEN)
+resp = fb.search(q=29097, cols="ixBug,sTitle,sPersonAssignedTo")
+print resp.prettify()
+print resp.cases.case.ixbug.string
+print resp.cases.case.stitle.string
+print resp.cases.case.spersonassignedto.string
