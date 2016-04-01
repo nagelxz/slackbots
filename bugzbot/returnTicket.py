@@ -10,6 +10,6 @@ def returnTicket(ticketNum):
 	ticketOwner = retrieveTicket.cases.case.spersonassignedto.string
 	ticketURL   = "https://tenthwave.fogbugz.com/f/cases/"+ticketNum
 	ticketLastUpdate = retrieveTicket.cases.case.sLatestTextSummary.string
-	ticket = ticketURL + "\n\nTicket: " + ticketNum + "\n" + ticketTitle
+	ticket = ticketURL + "\n\nTicket: " + ticketNum + "\n" + ticketTitle + "\n\n" + ticketLastUpdate
 
  	return ticket
