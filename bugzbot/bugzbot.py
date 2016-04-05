@@ -21,7 +21,6 @@ try:
 		messages = sc.rtm_read()
 		
 		for new_reply in messages:
-			print(new_reply)
 			
 			if 'type' in new_reply:
 			

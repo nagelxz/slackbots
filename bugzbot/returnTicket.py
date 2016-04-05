@@ -6,8 +6,6 @@ def returnTicket(ticket_num, config):
 	fb = FogBugz(config['FOGBUGZ_URL'], config['FOGBUGZ_TOKEN'])
 	retrieve_ticket = fb.search(q=ticket_num, cols="ixBug,sTitle,sLatestTextSummary,sArea,sProject")
 
-	print retrieve_ticket.prettify()
-
 	if retrieve_ticket.cases['count'] == str(1):
 	
 		ticket_title = retrieve_ticket.cases.case.stitle.string
