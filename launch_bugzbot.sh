@@ -1,6 +1,6 @@
-BUGZBOTDIR=/Users/nagel/Documents/tenthwavebots/replacebot
+BUGZBOTDIR=/home/webapps/tenthwavebots/bugzbot
 
 cd $BUGZBOTDIR && \
      . bin/activate && \
-     python bugzbot.py
+     python bugzbot.py &
 
