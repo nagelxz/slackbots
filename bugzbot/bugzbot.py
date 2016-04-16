@@ -1,7 +1,9 @@
-import time, json, yaml, re, os, sys
+import time, json, yaml, re, os, sys, cgitb
 from datetime import datetime, timedelta
 from slackclient import SlackClient
 import returnTicket as bugz
+
+cgitb.enable(logdir=os.path.join(os.path.dirname('/home/webapps/tenthwavebots/bugzbot'), 'bugzbot_logs',display=False,format='text')
 
 def find_channel(channel):
 	return sc.server.channels.find(channel)
