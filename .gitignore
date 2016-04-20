@@ -1,0 +1,11 @@
+*.log
+*.swp
+*.py[co]
+.project
+.pydevproject
+*~
+*.db
+*.orig
+*.DS_Store
+*.sls.bak
+.coverage
