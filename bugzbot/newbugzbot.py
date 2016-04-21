@@ -10,16 +10,15 @@ from fogbugz import FogBugz
 class Bugz(object):
 
     def __init__(self):
-        config = yaml.load(file('bugzbot.conf', 'r'))
-        self.fb = FogBugz(config['FOGBUGZ_URL'], config['FOGBUGZ_TOKEN'])
+        self.config = yaml.load(file('bugzbot.conf', 'r'))
+        self.fb = FogBugz(self.config['FOGBUGZ_URL'], self.config['FOGBUGZ_TOKEN'])
 
     def returnUser(self, _semail):
         user = self.fb.viewPerson(semail=_semail)
 
         try:
-            fb_user = [user.people.person.sfullname.string, user.people.person.ixperson.string]
-            name = user.people.person.sfullname.string
-            return fb_user
+            self.fb_user = user.people.person.sfullname.string
+            return self.fb_user
         except AttributeError:
             return "User not found"
 
@@ -30,7 +29,7 @@ class Bugz(object):
 
         if touser and fromuser != "User not found":
             event = "This ticket was assigned to you by slack user " + orig_user[1] + " courtesy of bugzbot!"
-            #fb.edit(ixBug=ticket_num, sPersonAssignedTo=touser, sEvent=event)
+            # fb.edit(ixBug=ticket_num, sPersonAssignedTo=touser, sEvent=event)
 
     def returnTicket(self, option, ticket_num):
         if option:
@@ -106,7 +105,7 @@ class MessageProcessor(object):
                 self.ticket = Bugz().returnTicket(False, ticket_num)
 
             try:
-                fromuser = find_user(orig_user)
+                fromuser = sc.find_user(orig_user)
 
                 if self.ticket.startswith("Something"):
                     sc.client.api_call('chat.postMessage', channel=from_user[0], as_user=True, text=self.ticket)
@@ -126,14 +125,14 @@ class MessageProcessor(object):
 
         elif self.options[0]:  # short
             self.ticket = Bugz().returnTicket(True, ticket_num)
-            channel_reply = find_channel(channel)
+            channel_reply = sc.find_channel(channel)
 
             if channel_reply:
                 channel_reply.send_message(self.ticket)
 
         else:  # regular
             self.ticket = Bugz().returnTicket(False, ticket_num)
-            channel_reply = find_channel(channel)
+            channel_reply = sc.find_channel(channel)
 
             if channel_reply:
                 channel_reply.send_message(self.ticket)
@@ -169,14 +168,12 @@ class Slack(object):
 
         return self.client
 
+    def find_channel(self, channel):
+        return sc.client.server.channels.find(channel)
 
-def find_channel(channel):
-    return sc.client.server.channels.find(channel)
-
-
-def find_user(users):
-    user = sc.client.api_call('users.info', user=users)
-    return [user['user']['id'], user['user']['real_name'], user['user']['profile']['email']]
+    def find_user(self, users):
+        user = sc.client.api_call('users.info', user=users)
+        return [user['user']['id'], user['user']['real_name'], user['user']['profile']['email']]
 
 sc = Slack()
 sc.start()
