@@ -2,7 +2,7 @@ import time
 import yaml
 import sys
 import re
-# import ushlex as shlex
+import ushlex as shlex
 from tinydb import TinyDB, where, Query
 from tinydb.storages import JSONStorage
 from tinydb.middlewares import CachingMiddleware
@@ -19,6 +19,26 @@ class Voting(object):
 
     def closeDB(self):
         self.db.close()
+        
+    def process_score_command(self, channel, message, user):
+        self.split_message = shlex.split(message)
+
+        for msg in self.split_message:
+
+            if re.match(r'top', msg):
+                self.top_num = re.search(r'(\d)', message).group()
+                return self.get_scores(channel, self.top_num)
+            # elif re.match(r'clear', msg):
+                # ask to confirm that you want to clear votes
+                    # !score yes clear channel votes
+                    # have function check if it says this before splitting
+                    # have a flag that checks to see if !score clear has been called recently (boolean)
+                        # reset after cleared
+                # i need slackbot to be a class like bugzbot for this
+                    # if calling !score clear all
+                    # confirm !score yes clear all votes
+                    # before clearing save output of what tables exist that aren't default to send a message
+                        # message saying all votes for all channels have been cleared at the request of [username]
 
     def process_votes(self, message, channel):
         self.sign = ''
@@ -27,8 +47,6 @@ class Voting(object):
             self.sign = '+'
         elif message.endswith:
             self.sign = '-'
-
-        # print "got sign?"
 
         self.vote = message[:-2].strip().encode('ascii', 'ignore')
         self.tally = self.update_votes(self.vote, self.sign, channel)
@@ -60,17 +78,15 @@ class Voting(object):
         else:
             self.tally = -1
 
-        # print "which sign?" + str(self.tally)
 
         if not self.exists:
             self.tw.insert({'name': message, 'tally': self.tally})
-            # print self.tw.all()
+
             if self.tally > 0:
-                # print "how about here"
                 self.resp = message + "++ [woot! now at " + str(self.tally) + "]"
             else:
-                # print "what about now"
                 self.resp = message + "-- [ouch! now at " + str(self.tally) + "]"
+                
         else:
             self.old = self.tw.get(self.votes.name == message)
             self.tw.update({'tally': (self.old['tally'] + self.tally)}, where('name') == message)
@@ -108,8 +124,7 @@ try:
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
                     message = new_reply['text']
-                    # print message
-                    # user = new_reply['user']
+                    user = new_reply['user']
                     channel = new_reply['channel']
 
                     if message.endswith('++') or message.endswith('--'):
@@ -117,12 +132,18 @@ try:
                         if channel_reply:
                             resp = vote.process_votes(message, channel)
                             channel_reply.send_message(resp)
+
                     elif len(re.findall(r'!(score)', message)) > 0:
                         channel_reply = find_channel(channel)
                         if channel_reply:
-                            msg = re.search(r'!((score) top \d)', message).group()
-                            # print msg
-                            top_num = re.search(r'(\d)', msg).group()
+                            msg = re.search(r'!((score).*?(top|clear).*\d?)', message).group()
+                            resp = vote.process_score_command(channel, msg, user)
+                            channel_reply.send_message(resp)
+
+                    elif len(re.findall(r'!(top).*?(\d)', message)) > 0:
+                        channel_reply = find_channel(channel)
+                        if channel_reply:
+                            top_num = re.search(r'(\d)', message).group()
                             resp = vote.get_scores(channel, top_num)
                             channel_reply.send_message(resp)
 
