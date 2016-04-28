@@ -24,8 +24,8 @@ class Bugz(object):
 
     def assignTicket(self, ticket_num, user, orig_user):
         self.touser = self.returnUser(user)
-        #print user
-        #print self.touser
+        print user
+        print self.touser
         if self.touser != "User not found":
             self.event = "This ticket was assigned to you by slack user " + \
                 orig_user[1] + " courtesy of bugzbot!"
@@ -34,7 +34,7 @@ class Bugz(object):
                 sEvent=self.event)
 
             self.checker = self.fb.search(q=ticket_num, cols="ixPersonAssignedTo")
-            #print self.checker
+            print self.checker
 
             if self.checker.cases.case.ixpersonassignedto.string != "93":
                 return "success"
@@ -57,12 +57,12 @@ class Bugz(object):
 
                 self.ticket = "Ticket: " + ticket_num + "  |  " + self.ticket_title + \
                     "\n\n" + self.ticket_URL
-                #print self.ticket
+                print self.ticket
                 return self.ticket
             else:
                 msg = "Something went wrong! Either Fogbugz is down, you're a magician calling a number " \
                     "that does not exist yet, or it somehow returned more than one ticket."
-                #print msg
+                print msg
                 return msg
         else:
             self.retrieve_ticket = self.fb.search(
@@ -79,12 +79,12 @@ class Bugz(object):
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
-                #print self.ticket
+                print self.ticket
                 return self.ticket
             else:
                 msg = "Something went wrong! Either Fogbugz is down, you're a magician calling a number " \
                     "that does not exist yet, or it somehow returned more than one ticket."
-                #print msg
+                print msg
                 return msg
 
 
@@ -98,15 +98,15 @@ class MessageProcessor(object):
         self.split_message = shlex.split(message)
         self.options = self.processOptions(self.split_message)
 
-        #print self.split_message
-        #print self.options
-        #print ticket_num
+        print self.split_message
+        print self.options
+        print ticket_num
 
         if self.options[1] or self.options[2]:
             for msg in self.split_message:
                 if re.match(r'(?:<@\w.*?>)', msg):
                     self.touser = re.search(r'((?<=\<@)\w*)', msg).group(0)
-                    #print self.touser
+                    print self.touser
 
         if self.options[2]:  # assignto
             #  this is going to be fun...
@@ -177,11 +177,11 @@ class MessageProcessor(object):
 
         for msg in message:
 
-            if re.match(r'(-short)', msg):
+            if re.match(r'-(short|-s)', msg):
                 self._short = True
-            elif re.match(r'(-sendto)', msg):
+            elif re.match(r'-(sendto|to)', msg):
                 self._sendto = True
-            elif re.match(r'(-assignto)', msg):
+            elif re.match(r'-(assign)', msg):
                 self._assignto = True
             elif re.match(r'(-fullname)', msg):
                 self._name = True
@@ -228,7 +228,7 @@ try:
                     if len(re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)) > 0:
                         tickets = re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)
                         for ticket in tickets:
-                            ##print ticket
+                            print ticket
                             ticket_num = ticket[2]
                             msg = MessageProcessor()
                             msg.processMessage(message, ticket_num, orig_user, channel)

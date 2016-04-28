@@ -1,6 +1,8 @@
 import time
 import yaml
 import sys
+import re
+# import ushlex as shlex
 from tinydb import TinyDB, where, Query
 from tinydb.storages import JSONStorage
 from tinydb.middlewares import CachingMiddleware
@@ -11,9 +13,12 @@ class Voting(object):
 
     def __init__(self):
         self.db = TinyDB('tw_bot.json', storage=CachingMiddleware(JSONStorage))
-        #self.db.WRITE_CACHE_SIZE = 3
-        self.tw = self.db.table('tenthwave')
+        self.db.WRITE_CACHE_SIZE = 1
+        # self.tw = self.db.table('tenthwave')
         self.votes = Query()
+
+    def closeDB(self):
+        self.db.close()
 
     def process_votes(self, message, channel):
         self.sign = ''
@@ -23,16 +28,30 @@ class Voting(object):
         elif message.endswith:
             self.sign = '-'
 
-        print "got sign?"
+        # print "got sign?"
 
-        self.vote = message[:-2].strip()
+        self.vote = message[:-2].strip().encode('ascii', 'ignore')
         self.tally = self.update_votes(self.vote, self.sign, channel)
         return self.tally
+
+    def get_scores(self, channel, top_num):
+        self.score = self.db.table(channel)
+        self.table_dump = self.score.all()
+        
+        self.table_dump = sorted(self.table_dump, key=lambda v: v['tally'], reverse=True)
+
+        self.scores = "Listing the top " + str(top_num) + " votes: \n\n"
+
+        for vote in self.table_dump:
+            self.scores = self.scores + vote['name'].encode('ascii', 'ignore') + \
+                " : score  " + str(vote['tally']) + "\n"
+
+        return self.scores
 
     def update_votes(self, message, plusminus, channel):
         self.tw = self.db.table(channel)
         self.exists = self.tw.contains(self.votes['name'] == message)
-        print "do i exist?" + str(self.exists)
+
         self.tally = 0
         self.resp = ''
 
@@ -41,17 +60,16 @@ class Voting(object):
         else:
             self.tally = -1
 
-        print "which sign?" + str(self.tally)
+        # print "which sign?" + str(self.tally)
 
         if not self.exists:
-            print "do i reach this?"
             self.tw.insert({'name': message, 'tally': self.tally})
-            print self.tw.all()
+            # print self.tw.all()
             if self.tally > 0:
-                print "how about here"
+                # print "how about here"
                 self.resp = message + "++ [woot! now at " + str(self.tally) + "]"
             else:
-                print "what about now"
+                # print "what about now"
                 self.resp = message + "-- [ouch! now at " + str(self.tally) + "]"
         else:
             self.old = self.tw.get(self.votes.name == message)
@@ -86,13 +104,12 @@ try:
         messages = sc.rtm_read()
 
         for new_reply in messages:
-            print(new_reply)
-
             if 'type' in new_reply:
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
                     message = new_reply['text']
-                    #user = new_reply['user']
+                    # print message
+                    # user = new_reply['user']
                     channel = new_reply['channel']
 
                     if message.endswith('++') or message.endswith('--'):
@@ -100,7 +117,16 @@ try:
                         if channel_reply:
                             resp = vote.process_votes(message, channel)
                             channel_reply.send_message(resp)
+                    elif len(re.findall(r'!(score)', message)) > 0:
+                        channel_reply = find_channel(channel)
+                        if channel_reply:
+                            msg = re.search(r'!((score) top \d)', message).group()
+                            # print msg
+                            top_num = re.search(r'(\d)', msg).group()
+                            resp = vote.get_scores(channel, top_num)
+                            channel_reply.send_message(resp)
 
-        time.sleep(0.1)
+        time.sleep(0.25)
 except KeyboardInterrupt:
+    vote.closeDB()
     sys.exit(0)
