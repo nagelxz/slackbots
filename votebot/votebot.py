@@ -60,7 +60,7 @@ class Voting(object):
 
         self.scores = "Listing the top " + str(top_num) + " votes: \n\n"
 
-        for vote in range(top_num):
+        for vote in range(int(top_num)):
             self.scores = self.scores + vote['name'].encode('ascii', 'ignore') + \
                 " : score  " + str(vote['tally']) + "\n"
 
