@@ -219,19 +219,29 @@ try:
         for new_reply in messages:
 
             if 'type' in new_reply:
+                print new_reply
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
-                    message = new_reply['text']
-                    orig_user = new_reply['user']
-                    channel = new_reply['channel']
+                    try:
+                        message = new_reply['text']
+                        orig_user = new_reply['user']
+                        channel = new_reply['channel']
 
-                    if len(re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)) > 0:
-                        tickets = re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)
-                        for ticket in tickets:
-                            print ticket
-                            ticket_num = ticket[2]
-                            msg = MessageProcessor()
-                            msg.processMessage(message, ticket_num, orig_user, channel)
+                        if len(re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)) > 0:
+                            tickets = re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)
+                            for ticket in tickets:
+                                print ticket
+                                ticket_num = ticket[2]
+                                msg = MessageProcessor()
+                                msg.processMessage(message, ticket_num, orig_user, channel)
+                    except KeyError:
+                        msg = "Crap! Something broke! someone didn't exist or a ghost tried to use me I think." \
+                            "Please let @nagel know this message came up"
+                        sc.api_call(
+                            'chat.postMessage',
+                            channel=new_reply['channel'],
+                            as_user=True,
+                            text=msg
 
         time.sleep(0.25)
 
