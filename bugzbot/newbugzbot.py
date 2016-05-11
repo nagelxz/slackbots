@@ -179,7 +179,7 @@ class MessageProcessor(object):
 
             if re.match(r'-(short|-s)', msg):
                 self._short = True
-            elif re.match(r'-(sendto|to)', msg):
+            elif re.match(r'-(sendto|to|notify)', msg):
                 self._sendto = True
             elif re.match(r'-(assign)', msg):
                 self._assignto = True
@@ -241,7 +241,7 @@ try:
                             'chat.postMessage',
                             channel=new_reply['channel'],
                             as_user=True,
-                            text=msg
+                            text=msg)
 
         time.sleep(0.25)
 
