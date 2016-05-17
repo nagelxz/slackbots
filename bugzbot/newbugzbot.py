@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import ushlex as shlex
 import time
 import yaml
@@ -177,13 +179,13 @@ class MessageProcessor(object):
 
         for msg in message:
 
-            if re.match(r'-(short|-s)', msg):
+            if re.match(ur'(—short$|-s$)', msg, re.UNICODE):
                 self._short = True
-            elif re.match(r'-(sendto|to|notify)', msg):
+            elif re.match(ur'(—sendto$|-to$|—notify)', msg, re.UNICODE):
                 self._sendto = True
-            elif re.match(r'-(assign)', msg):
+            elif re.match(ur'(—assign)', msg, re.UNICODE):
                 self._assignto = True
-            elif re.match(r'(-fullname)', msg):
+            elif re.match(ur'(—fullname$)', msg, re.UNICODE):
                 self._name = True
 
         return [self._short, self._sendto, self._assignto, self._fullname]
