@@ -68,7 +68,7 @@ class Voting(object):
 
     def update_votes(self, message, plusminus, channel):
         self.tw = self.db.table(channel)
-        self.exists = self.tw.contains(self.votes['name'] == message)
+        self.exists = self.tw.contains(self.votes['name'] == message.lower())
 
         self.tally = 0
         self.resp = ''
@@ -80,7 +80,7 @@ class Voting(object):
 
 
         if not self.exists:
-            self.tw.insert({'name': message, 'tally': self.tally})
+            self.tw.insert({'name': message.lower(), 'tally': self.tally})
 
             if self.tally > 0:
                 self.resp = message + "++ [woot! now at " + str(self.tally) + "]"
@@ -88,8 +88,8 @@ class Voting(object):
                 self.resp = message + "-- [ouch! now at " + str(self.tally) + "]"
                 
         else:
-            self.old = self.tw.get(self.votes.name == message)
-            self.tw.update({'tally': (self.old['tally'] + self.tally)}, where('name') == message)
+            self.old = self.tw.get(self.votes.name == message.lower())
+            self.tw.update({'tally': (self.old['tally'] + self.tally)}, where('name') == message.lower())
 
             if self.tally > 0:
                 self.resp = message + "++ [woot! now at " + str(self.old['tally'] + self.tally) + "]"
@@ -124,7 +124,6 @@ try:
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
                     message = new_reply['text']
-                    user = new_reply['user']
                     channel = new_reply['channel']
 
                     if message.endswith('++') or message.endswith('--'):
