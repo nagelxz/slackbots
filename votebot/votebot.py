@@ -66,8 +66,8 @@ class Voting(object):
         return self.scores
 
     def update_votes(self, message, plusminus, channel):
-        self.tw = self.db.table(channel)
-        self.exists = self.tw.contains(self.votes['name'] == message.lower())
+        self.vb = self.db.table(channel)
+        self.exists = self.vb.contains(self.votes['name'] == message.lower())
 
         self.tally = 0
         self.resp = ''
