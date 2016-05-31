@@ -12,9 +12,8 @@ from slackclient import SlackClient
 class Voting(object):
 
     def __init__(self):
-        self.db = TinyDB('tw_bot.json', storage=CachingMiddleware(JSONStorage))
+        self.db = TinyDB('votebot.json', storage=CachingMiddleware(JSONStorage))
         self.db.WRITE_CACHE_SIZE = 1
-        # self.tw = self.db.table('tenthwave')
         self.votes = Query()
 
     def closeDB(self):
