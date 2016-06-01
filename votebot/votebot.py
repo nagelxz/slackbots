@@ -12,9 +12,8 @@ from slackclient import SlackClient
 class Voting(object):
 
     def __init__(self):
-        self.db = TinyDB('tw_bot.json', storage=CachingMiddleware(JSONStorage))
+        self.db = TinyDB('votebot.json', storage=CachingMiddleware(JSONStorage))
         self.db.WRITE_CACHE_SIZE = 1
-        # self.tw = self.db.table('tenthwave')
         self.votes = Query()
 
     def closeDB(self):
@@ -60,15 +59,15 @@ class Voting(object):
 
         self.scores = "Listing the top " + str(top_num) + " votes: \n\n"
 
-        for vote in self.table_dump:
-            self.scores = self.scores + vote['name'].encode('ascii', 'ignore') + \
-                " : score  " + str(vote['tally']) + "\n"
+        for vote in range(int(top_num)):
+            self.scores = self.scores + self.table_dump[vote]['name'].encode('ascii', 'ignore') + \
+                " : score  " + str(self.table_dump[vote]['tally']) + "\n"
 
         return self.scores
 
     def update_votes(self, message, plusminus, channel):
-        self.tw = self.db.table(channel)
-        self.exists = self.tw.contains(self.votes['name'] == message)
+        self.vb = self.db.table(channel)
+        self.exists = self.vb.contains(self.votes['name'] == message.lower())
 
         self.tally = 0
         self.resp = ''
@@ -80,7 +79,7 @@ class Voting(object):
 
 
         if not self.exists:
-            self.tw.insert({'name': message, 'tally': self.tally})
+            self.tw.insert({'name': message.lower(), 'tally': self.tally})
 
             if self.tally > 0:
                 self.resp = message + "++ [woot! now at " + str(self.tally) + "]"
@@ -88,8 +87,8 @@ class Voting(object):
                 self.resp = message + "-- [ouch! now at " + str(self.tally) + "]"
                 
         else:
-            self.old = self.tw.get(self.votes.name == message)
-            self.tw.update({'tally': (self.old['tally'] + self.tally)}, where('name') == message)
+            self.old = self.tw.get(self.votes.name == message.lower())
+            self.tw.update({'tally': (self.old['tally'] + self.tally)}, where('name') == message.lower())
 
             if self.tally > 0:
                 self.resp = message + "++ [woot! now at " + str(self.old['tally'] + self.tally) + "]"
@@ -124,7 +123,6 @@ try:
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
                     message = new_reply['text']
-                    user = new_reply['user']
                     channel = new_reply['channel']
 
                     if message.endswith('++') or message.endswith('--'):

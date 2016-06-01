@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import ushlex as shlex
 import time
 import yaml
@@ -70,12 +72,13 @@ class Bugz(object):
                 cols="ixBug,sTitle,sLatestTextSummary,sArea,sProject")
 
             if self.retrieve_ticket.cases['count'] == str(1):
+                print self.retrieve_ticket.cases.case.slatesttextsummary.text
 
                 self.ticket_title = self.retrieve_ticket.cases.case.stitle.string
                 self.ticket_area = self.retrieve_ticket.cases.case.sarea.string
                 self.ticket_project = self.retrieve_ticket.cases.case.sproject.string
                 self.ticket_URL = "https://tenthwave.fogbugz.com/f/cases/" + ticket_num
-                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.string
+                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.text
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
@@ -177,13 +180,13 @@ class MessageProcessor(object):
 
         for msg in message:
 
-            if re.match(r'-(short|-s)', msg):
+            if re.match(ur'(—short$|-s$)', msg, re.UNICODE):
                 self._short = True
-            elif re.match(r'-(sendto|to)', msg):
+            elif re.match(ur'(—sendto$|-to$|—notify)', msg, re.UNICODE):
                 self._sendto = True
-            elif re.match(r'-(assign)', msg):
+            elif re.match(ur'(—assign)', msg, re.UNICODE):
                 self._assignto = True
-            elif re.match(r'(-fullname)', msg):
+            elif re.match(ur'(—fullname$)', msg, re.UNICODE):
                 self._name = True
 
         return [self._short, self._sendto, self._assignto, self._fullname]
@@ -219,19 +222,29 @@ try:
         for new_reply in messages:
 
             if 'type' in new_reply:
+                print new_reply
 
                 if new_reply['type'] == 'message' and 'text' in new_reply:
-                    message = new_reply['text']
-                    orig_user = new_reply['user']
-                    channel = new_reply['channel']
+                    try:
+                        message = new_reply['text']
+                        orig_user = new_reply['user']
+                        channel = new_reply['channel']
 
-                    if len(re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)) > 0:
-                        tickets = re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)
-                        for ticket in tickets:
-                            print ticket
-                            ticket_num = ticket[2]
-                            msg = MessageProcessor()
-                            msg.processMessage(message, ticket_num, orig_user, channel)
+                        if len(re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)) > 0:
+                            tickets = re.findall(r'!((bugz|case|ticket|ticekt).*?(\d{4,6}))', message)
+                            for ticket in tickets:
+                                print ticket
+                                ticket_num = ticket[2]
+                                msg = MessageProcessor()
+                                msg.processMessage(message, ticket_num, orig_user, channel)
+                    except KeyError:
+                        msg = "Crap! Something broke! someone didn't exist or a ghost tried to use me I think." \
+                            "Please let @nagel know this message came up"
+                        sc.api_call(
+                            'chat.postMessage',
+                            channel=new_reply['channel'],
+                            as_user=True,
+                            text=msg)
 
         time.sleep(0.25)
 
