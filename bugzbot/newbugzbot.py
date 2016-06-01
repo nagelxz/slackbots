@@ -77,12 +77,12 @@ class Bugz(object):
                 self.ticket_area = self.retrieve_ticket.cases.case.sarea.string
                 self.ticket_project = self.retrieve_ticket.cases.case.sproject.string
                 self.ticket_URL = "https://tenthwave.fogbugz.com/f/cases/" + ticket_num
-                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.string.encode('utf-8')
+                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.string.decode('utf-8')
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
-                print self.ticket.encode('utf-8')
-                return self.ticket.encode('utf-8')
+                print self.ticket.decode('utf-8')
+                return self.ticket.decode('utf-8')
             else:
                 msg = "Something went wrong! Either Fogbugz is down, you're a magician calling a number " \
                     "that does not exist yet, or it somehow returned more than one ticket."
