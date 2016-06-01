@@ -72,13 +72,13 @@ class Bugz(object):
                 cols="ixBug,sTitle,sLatestTextSummary,sArea,sProject")
 
             if self.retrieve_ticket.cases['count'] == str(1):
-                print self.retrieve_ticket.cases.case.slatesttextsummary
+                print self.retrieve_ticket.cases.case.slatesttextsummary.text
 
                 self.ticket_title = self.retrieve_ticket.cases.case.stitle.string
                 self.ticket_area = self.retrieve_ticket.cases.case.sarea.string
                 self.ticket_project = self.retrieve_ticket.cases.case.sproject.string
                 self.ticket_URL = "https://tenthwave.fogbugz.com/f/cases/" + ticket_num
-                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.decode('utf-8')
+                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.text
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
