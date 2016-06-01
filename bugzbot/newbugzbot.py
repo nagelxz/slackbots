@@ -72,6 +72,7 @@ class Bugz(object):
                 cols="ixBug,sTitle,sLatestTextSummary,sArea,sProject")
 
             if self.retrieve_ticket.cases['count'] == str(1):
+                print self.retrieve_ticket.cases.case.slatesttextsummary
 
                 self.ticket_title = self.retrieve_ticket.cases.case.stitle.string
                 self.ticket_area = self.retrieve_ticket.cases.case.sarea.string
