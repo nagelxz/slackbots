@@ -77,7 +77,7 @@ class Bugz(object):
                 self.ticket_area = self.retrieve_ticket.cases.case.sarea.string
                 self.ticket_project = self.retrieve_ticket.cases.case.sproject.string
                 self.ticket_URL = "https://tenthwave.fogbugz.com/f/cases/" + ticket_num
-                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.string.decode('utf-8')
+                self.ticket_last_update = self.retrieve_ticket.cases.case.slatesttextsummary.decode('utf-8')
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
