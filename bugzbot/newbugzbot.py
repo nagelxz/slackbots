@@ -82,8 +82,8 @@ class Bugz(object):
 
                 self.ticket = self.ticket_URL + "\n\nTicket: " + ticket_num + "\n" + self.ticket_project + \
                     " : " + self.ticket_area + "\n*" + self.ticket_title + "*\n\n" + self.ticket_last_update
-                print self.ticket.decode('utf-8')
-                return self.ticket.decode('utf-8')
+                print self.ticket
+                return self.ticket
             else:
                 msg = "Something went wrong! Either Fogbugz is down, you're a magician calling a number " \
                     "that does not exist yet, or it somehow returned more than one ticket."
